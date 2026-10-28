@@ -1,0 +1,76 @@
+# .github/workflows/verify-prepr-report.yml
+#
+# Standalone mode has no server, so nothing in CI can reproduce SonarQube for
+# IDE's findings. This job does the next best thing: it checks that the author
+# ran the analysis ON THIS COMMIT and that the verdict was PASS.
+#
+# What it catches:  forgetting to run it, running it and ignoring NEEDS CHANGES,
+#                   running it three commits ago and pushing more since.
+# What it does not: a determined author editing the summary by hand.
+#
+# It is an honesty check, not a security control. Say so out loud to the team
+# rather than letting people believe it is a real gate.
+#
+# The author produces the summary with:  python3 scripts/pr_body.py
+# and pastes it into the PR description (or uses --body-file with gh pr create).
+
+name: Pre-PR report check
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  verify:
+    name: Pre-PR report attached
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Does the PR touch Java?
+        id: java
+        run: |
+          if git diff --name-only --diff-filter=ACMR \
+               origin/${{ github.base_ref }}...HEAD -- '*.java' | grep -q .; then
+            echo "touched=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "touched=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check the attached summary
+        if: steps.java.outputs.touched == 'true'
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+
+          if ! printf '%s' "$BODY" | grep -q 'Pre-PR quality check:'; then
+            echo "::error::No pre-PR quality summary in the PR description."
+            echo "Run \"Pre-PR: Analyse changed files and build report\" in VS Code,"
+            echo "then: python3 scripts/pr_body.py  and paste the output into the PR body."
+            exit 1
+          fi
+
+          VERDICT=$(printf '%s' "$BODY" | sed -n 's/.*Pre-PR quality check: \([A-Z ]*\).*/\1/p' | head -1 | xargs)
+          CLAIMED=$(printf '%s' "$BODY" | sed -n 's/.*Commit: `\([0-9a-f]\{7,\}\)`.*/\1/p' | head -1)
+
+          echo "Verdict: ${VERDICT:-<none>}   Analysed commit: ${CLAIMED:-<none>}   HEAD: ${HEAD_SHA:0:12}"
+
+          if [ "$VERDICT" != "PASS" ]; then
+            echo "::error::The attached summary says '$VERDICT'. Fix the findings and re-run."
+            exit 1
+          fi
+
+          case "$HEAD_SHA" in
+            "$CLAIMED"*) ;;
+            *) echo "::error::The summary is for commit $CLAIMED but the PR head is ${HEAD_SHA:0:12}. Re-run the analysis and update the description."
+               exit 1 ;;
+          esac
+
+          echo "Pre-PR analysis confirmed for ${HEAD_SHA:0:12}."

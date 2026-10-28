@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: santa-db
+  namespace: sunil3gs98
+  labels:
+    app: santa-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: santa-db
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: santa-db
+        version: blue
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0.27
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "root"
+        - name: MYSQL_DATABASE
+          value: "santadb"
+        - name: MYSQL_USER
+          value: "admin"
+        - name: MYSQL_PASSWORD
+          value: "root"
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-pvc

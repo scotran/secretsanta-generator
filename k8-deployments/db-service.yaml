@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: santa-db-service
+  namespace: sunil3gs98
+  labels:
+    app: santa-db
+spec:
+  selector:
+    app: santa-db
+    version: blue
+  ports:
+  - protocol: TCP
+    port: 3306
+    targetPort: 3306
+  type: LoadBalancer

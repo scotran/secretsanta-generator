@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: santa-app-service
+  namespace: sunil3gs98
+  labels:
+    app: santa
+spec:
+  selector:
+    app: santa
+    version: blue
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: LoadBalancer

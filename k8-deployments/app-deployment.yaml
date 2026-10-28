@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: santa-app
+  namespace: sunil3gs98
+  labels:
+    app: santa
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: santa
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: santa
+        version: blue
+    spec:
+      containers:
+      - name: santa
+        image: sunil3gs98/secretesanta-generator:v1.1.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://santa-db-service:3306/santadb?autoReconnect=true&allowPublicKeyRetrieval=true&useSSL=false"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "admin"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "root"

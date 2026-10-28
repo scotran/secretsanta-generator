@@ -1,6 +1,6 @@
 # Secret Santa Generator Application :santa:
 
-A __secret santa generator web application__ built using __Spring Boot technologies__, __Thymeleaf views__, __JPA__, __H2 Database__, and more. The project features Spring Model, View, and Controller (MVC) architecture and Service and Repository layers.
+A __secret santa generator web application__ built using __Spring Boot technologies__, __Thymeleaf views__, __JPA__, __MYSQL Database__, and more. The project features Spring Model, View, and Controller (MVC) architecture and Service and Repository layers.
 
 This project is based on the popular Christmas game __Secret Santa__ where friends draw names from a hat to decide who they are required to give a present to. This project allows users to add names, and the project randomly generates secret santa matches (it isn't as simple as creating random pairs). There are different solutions to the "Secret Santa problem" as the problem essentially creates a directed graph. 
 
@@ -43,13 +43,7 @@ Or you can run it from Maven directly using the Spring Boot Maven plugin.
 ```
 
 ## Database Configuration
-This project uses an in-memory database (H2). If you would like to work on the project, enable the `http://localhost:8080/h2-console` via the property :
-
-```spring.h2.console.enabled=true```
-
-in __application.properties__.
-
-The database url used is `jdbc:h2:mem:testdb`.
+This project uses an MYSQL database 
 ## About
 
 This project was a personal project to learn more about Spring development, database management, and industry application architecture.
@@ -62,7 +56,7 @@ A small summary of the skills showcased during this project: :small_red_triangle
 * Thymeleaf technology, syntax, usage, capabilities, more
 * Client/Server data transfer
 * JPA annotations and repository management
-* H2 in-memory database management
+* MYSQL database management
 * Software/web application development processes
 * MVC architecture along with DAO, model, service layers, and similar
 * Accessibility, web design
